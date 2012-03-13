@@ -70,7 +70,7 @@ module Linkage
           record_2 = @records[1][@records_index[1]]
 
           Terminal::Table.new do |t|
-            #t.title = "Group #{@group_index + 1} of #{@group_count}"
+            t.title = "Group #{@group_index + 1} of #{@group_count}"
             t.headings = [
               {:value => "Record #{@records_index[0] + 1} of #{@records[0].length}", :colspan => 2, :alignment => :center},
               {:value => "Record #{@records_index[1] + 1} of #{@records[1].length}", :colspan => 2, :alignment => :center}
