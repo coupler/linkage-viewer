@@ -60,12 +60,14 @@ module Linkage
           dataset = dataset_id == 1 ? @dataset_1 : @dataset_2
           primary_key = dataset.field_set.primary_key.to_expr
 
-          dataset.select(*@fields[dataset_id - 1]).filter(primary_key => record_ids).all
+          dataset.select(*@field_expressions[dataset_id - 1]).filter(primary_key => record_ids).all
         end
 
         def get_table
-          fields_1 = @fields[0]
-          fields_2 = @fields[1]
+          field_expressions_1 = @field_expressions[0]
+          field_expressions_2 = @field_expressions[1]
+          field_names_1 = @field_names[0]
+          field_names_2 = @field_names[1]
           record_1 = @records[0][@records_index[0]]
           record_2 = @records[1][@records_index[1]]
 
@@ -76,18 +78,18 @@ module Linkage
               {:value => "Record #{@records_index[1] + 1} of #{@records[1].length}", :colspan => 2, :alignment => :center}
             ]
 
-            num = fields_1.length > fields_2.length ? fields_1.length : fields_2.length
+            num = [field_expressions_1.length, field_expressions_2.length].max
             num.times do |i|
-              field_1 = fields_1[i]
-              field_2 = fields_2[i]
+              field_name_1 = field_names_1[i]
+              field_name_2 = field_names_2[i]
               row = []
-              if field_1
-                row.push(field_1, record_1[field_1])
+              if field_name_1
+                row.push(field_name_1, record_1[field_name_1])
               else
                 row.push("", "")
               end
-              if field_2
-                row.push(record_2[field_2], field_2)
+              if field_name_2
+                row.push(record_2[field_name_2], field_name_2)
               else
                 row.push("", "")
               end
