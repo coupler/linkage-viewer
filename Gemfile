@@ -2,7 +2,7 @@ source "http://rubygems.org"
 
 gem "linkage"
 gem "highline"
-gem "terminal-table", :git => "https://github.com/visionmedia/terminal-table.git"
+gem "terminal-table"
 
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
