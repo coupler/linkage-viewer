@@ -8,6 +8,8 @@ module Linkage
           @groups_dataset = @result_set.groups_dataset
           @group_count = @groups_dataset.count
           @groups_records_dataset = @result_set.groups_records_dataset
+          @dataset_1 = @config.dataset_1
+          @dataset_2 = @config.dataset_2
 
           common_fields = [[], []]
           @config.expectations.each do |exp|
@@ -23,12 +25,25 @@ module Linkage
               end
             end
           end
-          @dataset_1 = @config.dataset_1
-          @dataset_2 = @config.dataset_2
-          all_fields = [
-            common_fields[0] | @dataset_1.field_set.values,
-            common_fields[1] | @dataset_2.field_set.values
-          ]
+
+          all_fields = if @config.visual_comparisons.empty?
+            [
+              common_fields[0] | @dataset_1.field_set.values,
+              common_fields[1] | @dataset_2.field_set.values
+            ]
+          else
+            @config.visual_comparisons.inject(common_fields.dup) do |arr, vc|
+              if vc.lhs.side == :lhs
+                arr[0].push(vc.lhs.data)
+                arr[1].push(vc.rhs.data)
+              else
+                arr[1].push(vc.lhs.data)
+                arr[0].push(vc.rhs.data)
+              end
+              arr
+            end
+          end
+
           @field_expressions = [[], []]
           @field_names = [[], []]
           all_fields.each_with_index do |fields, i|
@@ -48,6 +63,33 @@ module Linkage
 
         def start
           raise NotImplementedError
+        end
+
+        private
+
+        def set_group_index(index)
+          @group_index = index
+          @group = @groups_dataset.order(:id).limit(1, index).first
+          @records = []
+          @records_index = [0, 0]
+
+          if @config.linkage_type == :self
+            expressions = @field_expressions[0] | @field_expressions[1]
+            @records << get_records(@group[:id], 1, expressions)
+            @records << @records[0]
+            @records_index[1] = 1
+          else
+            @records << get_records(@group[:id], 1, @field_expressions[0])
+            @records << get_records(@group[:id], 2, @field_expressions[1])
+          end
+        end
+
+        def get_records(group_id, dataset_id, record_expressions)
+          record_ids = @groups_records_dataset.filter(:group_id => group_id, :dataset => dataset_id).select_map(:record_id)
+          dataset = dataset_id == 1 ? @dataset_1 : @dataset_2
+          primary_key = dataset.field_set.primary_key.to_expr
+
+          dataset.select(*record_expressions).filter(primary_key => record_ids).all
         end
       end
     end

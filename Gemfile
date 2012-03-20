@@ -1,8 +1,8 @@
 source "http://rubygems.org"
 
-gem "linkage"
 gem "highline"
 gem "terminal-table"
+gem "linkage", :path => "../linkage"
 
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.

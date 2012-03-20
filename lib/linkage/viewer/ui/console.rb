@@ -13,6 +13,8 @@ module Linkage
           menu
         end
 
+        private
+
         def menu
           @console.say(@menu_template.result(binding))
           result = @console.ask("? ") { |q| q.in = %w{1 2 3 4 p n q} }
@@ -33,34 +35,6 @@ module Linkage
             return
           end
           menu
-        end
-
-        private
-
-        def set_group_index(index)
-          @group_index = index
-          @group = @groups_dataset.order(:id).limit(1, index).first
-          @records = []
-          @records_index = [0, 0]
-
-          # dataset 1
-          @records << get_records(@group[:id], 1)
-
-          # dataset 2
-          if @config.linkage_type == :self
-            @records << @records[0]
-            @records_index[1] = 1
-          else
-            @records << get_records(@group[:id], 2)
-          end
-        end
-
-        def get_records(group_id, dataset_id)
-          record_ids = @groups_records_dataset.filter(:group_id => group_id, :dataset => dataset_id).select_map(:record_id)
-          dataset = dataset_id == 1 ? @dataset_1 : @dataset_2
-          primary_key = dataset.field_set.primary_key.to_expr
-
-          dataset.select(*@field_expressions[dataset_id - 1]).filter(primary_key => record_ids).all
         end
 
         def get_table
