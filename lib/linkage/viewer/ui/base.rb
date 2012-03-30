@@ -8,8 +8,7 @@ module Linkage
           @groups_dataset = @result_set.groups_dataset
           @group_count = @groups_dataset.count
           @groups_records_dataset = @result_set.groups_records_dataset
-          @dataset_1 = @config.dataset_1
-          @dataset_2 = @config.dataset_2
+          @datasets = [@config.dataset_1, @config.dataset_2]
 
           common_fields = [[], []]
           @config.expectations.each do |exp|
@@ -28,8 +27,8 @@ module Linkage
 
           all_fields = if @config.visual_comparisons.empty?
             [
-              common_fields[0] | @dataset_1.field_set.values,
-              common_fields[1] | @dataset_2.field_set.values
+              common_fields[0] | @datasets[0].field_set.values,
+              common_fields[1] | @datasets[1].field_set.values
             ]
           else
             @config.visual_comparisons.inject(common_fields.dup) do |arr, vc|
@@ -48,7 +47,7 @@ module Linkage
           @field_names = [[], []]
           all_fields.each_with_index do |fields, i|
             fields.each do |field|
-              expr = field.to_expr
+              expr = field.to_expr(@datasets[i].adapter_scheme)
               if expr.is_a?(Sequel::SQL::Function)
                 name = field.name
                 expr = expr.as(name)
@@ -86,7 +85,7 @@ module Linkage
 
         def get_records(group_id, dataset_id, record_expressions)
           record_ids = @groups_records_dataset.filter(:group_id => group_id, :dataset => dataset_id).select_map(:record_id)
-          dataset = dataset_id == 1 ? @dataset_1 : @dataset_2
+          dataset = dataset_id == 1 ? @datasets[0] : @datasets[1]
           primary_key = dataset.field_set.primary_key.to_expr
 
           dataset.select(*record_expressions).filter(primary_key => record_ids).all

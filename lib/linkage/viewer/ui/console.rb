@@ -77,8 +77,8 @@ module Linkage
 end
 
 Linkage::Viewer::UI::Console::MENU = <<EOF
-Dataset 1: <%= @dataset_1.table_name %> (<%= @dataset_1.adapter_scheme %>)
-Dataset 2: <%= @dataset_2.table_name %> (<%= @dataset_2.adapter_scheme %>)
+Dataset 1: <%= @datasets[0].table_name %> (<%= @datasets[0].adapter_scheme %>)
+Dataset 2: <%= @datasets[1].table_name %> (<%= @datasets[1].adapter_scheme %>)
 Groups:    <%= @groups_dataset.count %>
 
 <%= get_table %>
