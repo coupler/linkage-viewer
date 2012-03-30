@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "linkage-viewer"
-  s.version = "0.0.1"
+  s.version = "0.0.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Jeremy Stephens"]
-  s.date = "2012-03-20"
+  s.date = "2012-03-30"
   s.description = "Visualization tool for viewing results from the Linkage library"
   s.email = "jeremy.f.stephens@vanderbilt.edu"
   s.extra_rdoc_files = [
