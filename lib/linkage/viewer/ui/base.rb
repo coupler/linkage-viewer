@@ -7,8 +7,7 @@ module Linkage
           @result_set = @config.result_set
           @groups_dataset = @result_set.groups_dataset
           @group_count = @groups_dataset.count
-          @groups_records_dataset = @result_set.groups_records_dataset
-          @datasets = [@config.dataset_1, @config.dataset_2]
+          @datasets = @config.datasets_with_applied_expectations
 
           common_fields = [[], []]
           @config.expectations.each do |exp|
@@ -68,27 +67,24 @@ module Linkage
 
         def set_group_index(index)
           @group_index = index
-          @group = @groups_dataset.order(:id).limit(1, index).first
+          @group = @result_set.get_group(index)
           @records = []
           @records_index = [0, 0]
 
           if @config.linkage_type == :self
             expressions = @field_expressions[0] | @field_expressions[1]
-            @records << get_records(@group[:id], 1, expressions)
+            @records << get_records(@group, 1, expressions)
             @records << @records[0]
             @records_index[1] = 1
           else
-            @records << get_records(@group[:id], 1, @field_expressions[0])
-            @records << get_records(@group[:id], 2, @field_expressions[1])
+            @records << get_records(@group, 1, @field_expressions[0])
+            @records << get_records(@group, 2, @field_expressions[1])
           end
         end
 
-        def get_records(group_id, dataset_id, record_expressions)
-          record_ids = @groups_records_dataset.filter(:group_id => group_id, :dataset => dataset_id).select_map(:record_id)
+        def get_records(group, dataset_id, record_expressions)
           dataset = dataset_id == 1 ? @datasets[0] : @datasets[1]
-          primary_key = dataset.field_set.primary_key.to_expr
-
-          dataset.select(*record_expressions).filter(primary_key => record_ids).all
+          dataset.dataset_for_group(group).select(*record_expressions).all
         end
       end
     end
